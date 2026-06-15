@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="雅思词汇">
+  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi6Iux6K+t6K6+5aSH5LqR5ZueIiwic2hvcnRfbmFtZSI6IuS6kSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZjhmYWZjIiwidGhlbWVfY29sb3IiOiIjMGYxNzJhIn0=">
+  <title>Day 2 · 雅思词汇</title>
+  <style>
+    :root {
+      --primary: #0f172a;
+      --primary-light: #1e293b;
+      --accent: #0ea5e9;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 80px;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      padding: 1.5rem 1rem 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .day-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 0.3rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+    }
+
+    .header h1 { font-size: 1.3rem; font-weight: 700; }
+    .header .theme { font-size: 0.85rem; opacity: 0.85; margin-top: 0.25rem; }
+
+    .progress-bar {
+      background: rgba(255,255,255,0.2);
+      height: 6px;
+      border-radius: 3px;
+      margin-top: 0.75rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #38bdf8);
+      width: 3.33%;
+      border-radius: 3px;
+      transition: width 1s ease;
+    }
+
+    /* Tab Navigation */
+    .tab-nav {
+      display: flex;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+      position: sticky;
+      top: 0;
+      z-index: 99;
+    }
+
+    .tab-nav::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 60px;
+      padding: 0.75rem 0.5rem;
+      border: none;
+      background: none;
+      color: var(--text-light);
+      font-size: 0.75rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* Content */
+    .tab-content { display: none; padding: 1rem; }
+    .tab-content.active { display: block; }
+
+    /* Card */
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--primary);
+    }
+
+    /* Flashcard Swipe */
+    .flashcard-container {
+      position: relative;
+      height: 220px;
+      perspective: 1000px;
+    }
+
+    .flashcard {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.4s, opacity 0.4s;
+      cursor: pointer;
+    }
+
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.5s;
+      transform-style: preserve-3d;
+    }
+
+    .flashcard.flipped .flashcard-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flashcard-front, .flashcard-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .flashcard-front {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+    }
+
+    .flashcard-back {
+      background: var(--card-bg);
+      transform: rotateY(180deg);
+      border: 2px solid var(--accent);
+    }
+
+    .flashcard-word { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .flashcard-phonetic { font-size: 0.9rem; opacity: 0.8; }
+    .flashcard-meaning { font-size: 1.2rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+    .flashcard-example { font-size: 0.85rem; color: var(--text-light); font-style: italic; }
+
+    .card-counter {
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.8rem;
+      margin-top: 0.75rem;
+    }
+
+    .card-nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .card-nav-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .card-nav-btn:active { transform: scale(0.95); background: var(--bg); }
+
+    /* Vocab List */
+    .vocab-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+
+    .vocab-header {
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      background: linear-gradient(90deg, rgba(14,165,233,0.05), transparent);
+    }
+
+    .vocab-word-main { font-weight: 700; font-size: 1.1rem; color: var(--primary); }
+    .vocab-phonetic { color: var(--text-light); font-size: 0.85rem; }
+    .vocab-pos { background: var(--bg); padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; }
+
+    .vocab-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s;
+    }
+
+    .vocab-item.expanded .vocab-body { max-height: 400px; }
+    .vocab-item.expanded .vocab-toggle { transform: rotate(180deg); }
+
+    .vocab-details { padding: 1rem; border-top: 1px solid var(--border); font-size: 0.9rem; }
+    .vocab-detail-row { margin-bottom: 0.5rem; }
+    .vocab-detail-label { color: var(--accent); font-weight: 600; font-size: 0.8rem; }
+
+    /* Quiz */
+    .quiz-option {
+      padding: 0.875rem 1rem;
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .quiz-option:active { transform: scale(0.98); }
+    .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.08); }
+    .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.08); }
+    .quiz-option.disabled { pointer-events: none; opacity: 0.7; }
+
+    .quiz-letter {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--bg); display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
+    }
+
+    .quiz-option.correct .quiz-letter { background: var(--success); color: white; }
+    .quiz-option.wrong .quiz-letter { background: var(--danger); color: white; }
+
+    .quiz-explanation {
+      display: none;
+      padding: 0.75rem;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .quiz-explanation.show { display: block; }
+
+    /* Audio Player */
+    .audio-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .audio-title { font-weight: 700; margin-bottom: 0.5rem; }
+    .audio-meta { font-size: 0.8rem; opacity: 0.8; margin-bottom: 1rem; }
+
+    .audio-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .play-btn {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      background: white;
+      border: none;
+      color: var(--primary);
+      font-size: 1.3rem;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+
+    .audio-progress {
+      flex: 1;
+      height: 4px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .audio-progress-bar {
+      height: 100%;
+      background: white;
+      width: 0%;
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 0.5rem 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+    }
+
+    .bottom-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      border: none;
+      background: none;
+      color: var(--text-light);
+      font-size: 0.65rem;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .bottom-nav-btn .icon { font-size: 1.3rem; }
+    .bottom-nav-btn.active { color: var(--accent); }
+
+    /* Mark buttons */
+    .mark-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .mark-btn {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid;
+      border-radius: 8px;
+      background: none;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .mark-btn.mastered { border-color: var(--success); color: var(--success); }
+    .mark-btn.consolidating { border-color: var(--warning); color: var(--warning); }
+    .mark-btn.uncertain { border-color: var(--danger); color: var(--danger); }
+
+    .mark-btn.mastered.active { background: var(--success); color: white; }
+    .mark-btn.consolidating.active { background: var(--warning); color: white; }
+    .mark-btn.uncertain.active { background: var(--danger); color: white; }
+
+    /* Passage */
+    .passage-text {
+      line-height: 1.8;
+      font-size: 0.95rem;
+    }
+
+    .passage-text .highlight {
+      background: linear-gradient(120deg, rgba(14,165,233,0.2) 0%, rgba(14,165,233,0.2) 100%);
+      background-repeat: no-repeat;
+      background-size: 100% 35%;
+      background-position: 0 90%;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* Install prompt */
+    .install-prompt {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: var(--accent);
+      color: white;
+      padding: 0.75rem 1rem;
+      text-align: center;
+      font-size: 0.85rem;
+      z-index: 200;
+    }
+
+    .install-prompt.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="install-prompt" id="installPrompt">
+    点击分享按钮，选择"添加到主屏幕"，即可像 App 一样使用
+  </div>
+
+  <header class="header">
+    <div class="header-top">
+      <div class="day-badge">Day 2 / 60</div>
+    </div>
+    <h1>雅思词汇学习</h1>
+    <div class="theme">科技与创新</div>
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+  </header>
+
+  <!-- Tab Content -->
+  <div class="tab-content active" id="tab-flashcards">
+    <div class="card">
+      <div class="flashcard-container" id="flashcardContainer"></div>
+      <div class="card-counter" id="cardCounter">1 / 15</div>
+      <div class="card-nav">
+        <button class="card-nav-btn" onclick="prevCard()">&#9664;</button>
+        <button class="card-nav-btn" onclick="flipCurrentCard()">&#128260;</button>
+        <button class="card-nav-btn" onclick="nextCard()">&#9654;</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-vocab">
+    <div id="vocabList"></div>
+  </div>
+
+  <div class="tab-content" id="tab-quiz">
+    <div id="quizContainer"></div>
+  </div>
+
+  <div class="tab-content" id="tab-reading">
+    <div class="card">
+      <div class="card-title">短文阅读</div>
+      <div class="passage-text" id="passageText"></div>
+    </div>
+    <div id="readingQuiz"></div>
+  </div>
+
+  <div class="tab-content" id="tab-audio">
+    <div class="audio-card">
+      <div class="audio-title">单词朗读</div>
+      <div class="audio-meta">15个单词 + 例句 · 约6分钟</div>
+      <div class="audio-controls">
+        <button class="play-btn" onclick="toggleAudio('words')">&#9654;</button>
+        <div class="audio-progress">
+          <div class="audio-progress-bar" id="wordsProgress"></div>
+        </div>
+      </div>
+    </div>
+    <div class="audio-card">
+      <div class="audio-title">短文朗读</div>
+      <div class="audio-meta">阅读短文全文 · 约2分钟</div>
+      <div class="audio-controls">
+        <button class="play-btn" onclick="toggleAudio('passage')">&#9654;</button>
+        <div class="audio-progress">
+          <div class="audio-progress-bar" id="passageProgress"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="bottom-nav-btn active" onclick="switchTab('flashcards')">
+      <span class="icon">&#127919;</span>
+      <span>闪卡</span>
+    </button>
+    <button class="bottom-nav-btn" onclick="switchTab('vocab')">
+      <span class="icon">&#128214;</span>
+      <span>词汇</span>
+    </button>
+    <button class="bottom-nav-btn" onclick="switchTab('quiz')">
+      <span class="icon">&#9999;&#65039;</span>
+      <span>测验</span>
+    </button>
+    <button class="bottom-nav-btn" onclick="switchTab('reading')">
+      <span class="icon">&#128196;</span>
+      <span>阅读</span>
+    </button>
+    <button class="bottom-nav-btn" onclick="switchTab('audio')">
+      <span class="icon">&#127911;</span>
+      <span>音频</span>
+    </button>
+  </nav>
+
+  <script>
+    // -- Vocabulary Data --
+    const words = [
+      { word: "algorithm", phonetic: "/\u02c8\u00e6l\u0261\u0259r\u026a\u00f0\u0259m/", pos: "n.", meaning: "算法", example: "The search engine uses a complex algorithm to rank websites.", collocations: "search algorithm / machine learning algorithm", synonyms: "procedure, formula", antonyms: "" },
+      { word: "automation", phonetic: "/\u02cc\u0254\u02d0t\u0259\u02c8me\u026a\u0283n/", pos: "n.", meaning: "自动化", example: "Automation has significantly reduced production costs in factories.", collocations: "industrial automation / process automation", synonyms: "mechanization", antonyms: "manual operation" },
+      { word: "breakthrough", phonetic: "/\u02c8bre\u026ak\u03b8ru\u02d0/", pos: "n.", meaning: "突破", example: "Scientists have made a major breakthrough in cancer treatment.", collocations: "major breakthrough / scientific breakthrough", synonyms: "advance, discovery", antonyms: "stagnation" },
+      { word: "compute", phonetic: "/k\u0259m\u02c8pju\u02d0t/", pos: "v.", meaning: "计算", example: "The supercomputer can compute millions of equations per second.", collocations: "compute data / compute results", synonyms: "calculate, process", antonyms: "" },
+      { word: "digital", phonetic: "/\u02c8d\u026ad\u0292\u026atl/", pos: "adj.", meaning: "数字的", example: "The company is transitioning from analog to digital systems.", collocations: "digital technology / digital transformation", synonyms: "electronic, computerized", antonyms: "analog" },
+      { word: "efficiency", phonetic: "/\u026a\u02c8f\u026a\u0283nsi/", pos: "n.", meaning: "效率", example: "Improving energy efficiency is crucial for reducing carbon emissions.", collocations: "energy efficiency / operational efficiency", synonyms: "productivity, effectiveness", antonyms: "inefficiency" },
+      { word: "generate", phonetic: "/\u02c8d\u0292en\u0259re\u026at/", pos: "v.", meaning: "产生，生成", example: "Wind turbines generate electricity without producing pollution.", collocations: "generate electricity / generate revenue", synonyms: "produce, create", antonyms: "consume" },
+      { word: "hardware", phonetic: "/\u02c8h\u0251\u02d0dwe\u0259(r)/", pos: "n.", meaning: "硬件", example: "The new hardware upgrade has greatly improved system performance.", collocations: "computer hardware / hardware components", synonyms: "equipment, machinery", antonyms: "software" },
+      { word: "integrate", phonetic: "/\u02c8\u026ant\u026a\u0261re\u026at/", pos: "v.", meaning: "整合，集成", example: "The company plans to integrate AI into its existing products.", collocations: "integrate with / integrate into", synonyms: "combine, unify", antonyms: "separate" },
+      { word: "interface", phonetic: "/\u02c8\u026ant\u0259fe\u026as/", pos: "n.", meaning: "界面，接口", example: "The new user interface is much more intuitive than the previous version.", collocations: "user interface / graphical interface", synonyms: "UI, portal", antonyms: "" },
+      { word: "network", phonetic: "/\u02c8netw\u025c\u02d0k/", pos: "n.", meaning: "网络", example: "Social media has created a global network of connected individuals.", collocations: "computer network / social network", synonyms: "system, web", antonyms: "" },
+      { word: "process", phonetic: "/\u02c8pr\u0259\u028ases/", pos: "n./v.", meaning: "过程；处理", example: "The system can process large amounts of data in real time.", collocations: "manufacturing process / process information", synonyms: "procedure, handle", antonyms: "" },
+      { word: "remote", phonetic: "/r\u026a\u02c8m\u0259\u028at/", pos: "adj.", meaning: "远程的", example: "Remote work has become increasingly common since the pandemic.", collocations: "remote work / remote access", synonyms: "distant, virtual", antonyms: "on-site" },
+      { word: "software", phonetic: "/\u02c8s\u0252ftwe\u0259(r)/", pos: "n.", meaning: "软件", example: "The new software update includes several security patches.", collocations: "application software / software development", synonyms: "program, application", antonyms: "hardware" },
+      { word: "virtual", phonetic: "/\u02c8v\u025c\u02d0t\u0283u\u0259l/", pos: "adj.", meaning: "虚拟的", example: "Virtual reality technology is transforming the gaming industry.", collocations: "virtual reality / virtual meeting", synonyms: "simulated, digital", antonyms: "physical, real" }
+    ];
+
+    const quizQuestions = [
+      { question: "algorithm 的意思是？", options: ["算法", "自动化", "硬件", "网络"], correct: 0, explanation: "algorithm 意为'算法'。" },
+      { question: "automation 的意思是？", options: ["手动操作", "自动化", "虚拟化", "数字化"], correct: 1, explanation: "automation 意为'自动化'。" },
+      { question: "breakthrough 的意思是？", options: ["停滞", "倒退", "突破", "限制"], correct: 2, explanation: "breakthrough 意为'突破'。" },
+      { question: "efficiency 的反义词是？", options: ["productivity", "effectiveness", "inefficiency", "automation"], correct: 2, explanation: "efficiency 意为'效率'，反义词是 inefficiency（低效）。" },
+      { question: "The company plans to _____ AI into its existing products.", options: ["generate", "integrate", "compute", "network"], correct: 1, explanation: "integrate 意为'整合，集成'，integrate A into B 表示将 A 集成到 B 中。" }
+    ];
+
+    const passageText = `In the modern era, <span class="highlight">digital</span> transformation has become a priority for businesses worldwide. At the heart of this transformation lies the <span class="highlight">algorithm</span> — a set of rules that computers follow to solve problems and make decisions. Companies use sophisticated algorithms to <span class="highlight">process</span> vast amounts of data and <span class="highlight">generate</span> valuable insights.
+
+<span class="highlight">Automation</span> is another key trend, allowing organizations to improve <span class="highlight">efficiency</span> and reduce human error. By combining advanced <span class="highlight">software</span> with powerful <span class="highlight">hardware</span>, businesses can automate repetitive tasks and focus on innovation.
+
+The <span class="highlight">breakthrough</span> in <span class="highlight">remote</span> work technologies has changed how teams collaborate. Employees can now access company <span class="highlight">network</span>s from anywhere, using intuitive <span class="highlight">interface</span>s that <span class="highlight">integrate</span> multiple tools into a single platform.
+
+Looking ahead, <span class="highlight">virtual</span> reality and augmented reality promise to create new ways for people to interact with <span class="highlight">compute</span>r systems. These technologies will continue to reshape our <span class="highlight">digital</span> world.`;
+
+    // -- Flashcards --
+    let currentCard = 0;
+
+    function renderFlashcards() {
+      const container = document.getElementById('flashcardContainer');
+      container.innerHTML = words.map((w, i) => `
+        <div class="flashcard ${i === 0 ? '' : ''}" style="transform: translateX(${(i - currentCard) * 110}%) scale(${i === currentCard ? 1 : 0.9}); opacity: ${i === currentCard ? 1 : 0}; z-index: ${words.length - Math.abs(i - currentCard)};" onclick="flipCard(this)">
+          <div class="flashcard-inner">
+            <div class="flashcard-front">
+              <div class="flashcard-word">${w.word}</div>
+              <div class="flashcard-phonetic">${w.phonetic}</div>
+              <div style="margin-top:1rem;font-size:0.8rem;opacity:0.6;">点击翻转</div>
+            </div>
+            <div class="flashcard-back">
+              <div class="flashcard-meaning">${w.meaning}</div>
+              <div class="flashcard-example">"${w.example}"</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+      document.getElementById('cardCounter').textContent = `${currentCard + 1} / ${words.length}`;
+    }
+
+    function flipCard(el) { el.classList.toggle('flipped'); }
+    function flipCurrentCard() { document.querySelectorAll('.flashcard')[currentCard]?.classList.toggle('flipped'); }
+
+    function nextCard() {
+      if (currentCard < words.length - 1) { currentCard++; renderFlashcards(); }
+    }
+
+    function prevCard() {
+      if (currentCard > 0) { currentCard--; renderFlashcards(); }
+    }
+
+    // Swipe support
+    let touchStartX = 0;
+    document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+    document.addEventListener('touchend', e => {
+      const diff = touchStartX - e.changedTouches[0].screenX;
+      if (Math.abs(diff) > 50) diff > 0 ? nextCard() : prevCard();
+    });
+
+    // -- Vocab List --
+    function renderVocab() {
+      document.getElementById('vocabList').innerHTML = words.map((w, i) => `
+        <div class="vocab-item" onclick="this.classList.toggle('expanded')">
+          <div class="vocab-header">
+            <div>
+              <div class="vocab-word-main">${w.word}</div>
+              <div class="vocab-phonetic">${w.phonetic}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <span class="vocab-pos">${w.pos}</span>
+              <span class="vocab-toggle" style="transition:transform 0.3s;">&#9660;</span>
+            </div>
+          </div>
+          <div class="vocab-body">
+            <div class="vocab-details">
+              <div class="vocab-detail-row"><span class="vocab-detail-label">释义</span> ${w.meaning}</div>
+              <div class="vocab-detail-row"><span class="vocab-detail-label">例句</span> ${w.example}</div>
+              <div class="vocab-detail-row"><span class="vocab-detail-label">搭配</span> ${w.collocations}</div>
+              <div class="vocab-detail-row"><span class="vocab-detail-label">同义</span> ${w.synonyms || '无'}</div>
+              <div class="vocab-detail-row"><span class="vocab-detail-label">反义</span> ${w.antonyms || '无'}</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // -- Quiz --
+    function renderQuiz() {
+      document.getElementById('quizContainer').innerHTML = quizQuestions.map((q, i) => `
+        <div class="card" data-q="${i}">
+          <div style="font-size:0.8rem;color:var(--accent);margin-bottom:0.5rem;">题目 ${i+1}</div>
+          <div style="font-weight:600;margin-bottom:1rem;">${q.question}</div>
+          ${q.options.map((opt, j) => `
+            <div class="quiz-option" onclick="checkAnswer(${i}, ${j})">
+              <div class="quiz-letter">${String.fromCharCode(65+j)}</div>
+              <div>${opt}</div>
+            </div>
+          `).join('')}
+          <div class="quiz-explanation" id="exp-${i}"><strong>解析：</strong>${q.explanation}</div>
+        </div>
+      `).join('');
+    }
+
+    function checkAnswer(qIdx, optIdx) {
+      const card = document.querySelector(`[data-q="${qIdx}"]`);
+      if (card.dataset.answered) return;
+      card.dataset.answered = 'true';
+      const correct = quizQuestions[qIdx].correct;
+      card.querySelectorAll('.quiz-option').forEach((opt, i) => {
+        opt.classList.add('disabled');
+        if (i === correct) opt.classList.add('correct');
+        else if (i === optIdx) opt.classList.add('wrong');
+      });
+      document.getElementById(`exp-${qIdx}`).classList.add('show');
+    }
+
+    // -- Reading --
+    function renderReading() {
+      document.getElementById('passageText').innerHTML = passageText;
+    }
+
+    // -- Tab Switching --
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`tab-${tab}`).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    // -- Audio (placeholder) --
+    function toggleAudio(type) {
+      alert('请将生成的 MP3 文件放入同一目录：\n- Day02_Words.mp3\n- Day02_Passage.mp3');
+    }
+
+    // -- Install Prompt --
+    if ('standalone' in window.navigator && !window.navigator.standalone) {
+      document.getElementById('installPrompt').classList.add('show');
+      setTimeout(() => document.getElementById('installPrompt').classList.remove('show'), 8000);
+    }
+
+    // -- Init --
+    renderFlashcards();
+    renderVocab();
+    renderQuiz();
+    renderReading();
+  </script>
+</body>
+</html>
